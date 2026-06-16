@@ -1,0 +1,24 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "0.1.0",
+	"FriendlyName": "FreeUltraCode BluePrint Mode",
+	"Description": "自然语言蓝图编排模式：通过 /FreeUltraCodeBluePrintMode.BlueprintMode.Start 与 /FreeUltraCodeBluePrintMode.BlueprintMode.End 在 UE 编辑器内实时生成、编辑蓝图。支持上下文分级加载、AI 创建蓝图、checkpoint 回滚，并可通过 MCP 自动补全本地无法完成的动作。",
+	"Category": "AI Tools",
+	"CreatedBy": "FreeUltraCode BluePrint Mode",
+	"CreatedByURL": "https://github.com/wellingfeng/ue-blueprint-mode",
+	"DocsURL": "https://github.com/wellingfeng/ue-blueprint-mode#readme",
+	"MarketplaceURL": "https://github.com/wellingfeng/ue-blueprint-mode",
+	"SupportURL": "https://github.com/wellingfeng/ue-blueprint-mode/issues",
+	"CanContainContent": false,
+	"IsBetaVersion": true,
+	"IsExperimentalVersion": false,
+	"Installed": false,
+	"Modules": [
+		{
+			"Name": "FreeUltraCodeBluePrintMode",
+			"Type": "Editor",
+			"LoadingPhase": "PostEngineInit"
+		}
+	]
+}
