@@ -76,6 +76,7 @@ bool FFreeUltraCodeBluePrintModeOpExecutor::ApplyOp(const FFreeUltraCodeBluePrin
 	case EFreeUltraCodeBluePrintModeOpType::ConnectPins: return DoConnectPins(Op, OutError);
 	case EFreeUltraCodeBluePrintModeOpType::SetProperty: return DoSetProperty(Op, OutError);
 	case EFreeUltraCodeBluePrintModeOpType::AddVariable: return DoAddVariable(Op, OutError);
+	case EFreeUltraCodeBluePrintModeOpType::AutoLayout:  return DoAutoLayout(Op, OutError);
 	case EFreeUltraCodeBluePrintModeOpType::DeleteNode:  return DoDeleteNode(Op, OutError);
 	case EFreeUltraCodeBluePrintModeOpType::Disconnect:  return DoDisconnect(Op, OutError);
 	default:
@@ -257,6 +258,149 @@ bool FFreeUltraCodeBluePrintModeOpExecutor::DoAddVariable(const FFreeUltraCodeBl
 		OutError = FString::Printf(TEXT("AddVariable: 添加变量 '%s' 失败"), *Op.Key);
 		return false;
 	}
+	return true;
+}
+
+bool FFreeUltraCodeBluePrintModeOpExecutor::DoAutoLayout(const FFreeUltraCodeBluePrintModeOp& Op, FString& OutError)
+{
+	if (!Graph)
+	{
+		OutError = TEXT("AutoLayout: 没有可用的目标图");
+		return false;
+	}
+
+	TArray<UEdGraphNode*> Nodes;
+	for (UEdGraphNode* Node : Graph->Nodes)
+	{
+		if (Node)
+		{
+			Nodes.Add(Node);
+		}
+	}
+
+	if (Nodes.Num() == 0)
+	{
+		return true;
+	}
+
+	const bool bUseDefaultOrigin = FMath::IsNearlyZero(Op.GraphPosition.X) && FMath::IsNearlyZero(Op.GraphPosition.Y);
+	const int32 StartX = bUseDefaultOrigin ? 0 : (int32)Op.GraphPosition.X;
+	const int32 StartY = bUseDefaultOrigin ? 0 : (int32)Op.GraphPosition.Y;
+	const int32 ColumnWidth = 420;
+	const int32 RowHeight = 180;
+
+	TMap<UEdGraphNode*, int32> Depths;
+	TMap<UEdGraphNode*, int32> IncomingCounts;
+
+	for (UEdGraphNode* Node : Nodes)
+	{
+		Depths.Add(Node, 0);
+		IncomingCounts.Add(Node, 0);
+	}
+
+	for (UEdGraphNode* Node : Nodes)
+	{
+		for (UEdGraphPin* Pin : Node->Pins)
+		{
+			if (!Pin || Pin->Direction != EGPD_Output)
+			{
+				continue;
+			}
+
+			for (UEdGraphPin* LinkedPin : Pin->LinkedTo)
+			{
+				UEdGraphNode* LinkedNode = LinkedPin ? LinkedPin->GetOwningNode() : nullptr;
+				if (LinkedNode && LinkedNode != Node && IncomingCounts.Contains(LinkedNode))
+				{
+					IncomingCounts.FindOrAdd(LinkedNode)++;
+				}
+			}
+		}
+	}
+
+	TArray<UEdGraphNode*> Queue;
+	for (UEdGraphNode* Node : Nodes)
+	{
+		if (IncomingCounts.FindRef(Node) == 0)
+		{
+			Queue.Add(Node);
+		}
+	}
+	if (Queue.Num() == 0)
+	{
+		Queue = Nodes;
+	}
+
+	TSet<UEdGraphNode*> Queued;
+	for (UEdGraphNode* Node : Queue)
+	{
+		Queued.Add(Node);
+	}
+	TSet<UEdGraphNode*> Processed;
+	for (int32 Index = 0; Index < Queue.Num(); ++Index)
+	{
+		UEdGraphNode* Node = Queue[Index];
+		if (!Node || Processed.Contains(Node))
+		{
+			continue;
+		}
+
+		Processed.Add(Node);
+		const int32 CurrentDepth = Depths.FindRef(Node);
+		for (UEdGraphPin* Pin : Node->Pins)
+		{
+			if (!Pin || Pin->Direction != EGPD_Output)
+			{
+				continue;
+			}
+
+			for (UEdGraphPin* LinkedPin : Pin->LinkedTo)
+			{
+				UEdGraphNode* LinkedNode = LinkedPin ? LinkedPin->GetOwningNode() : nullptr;
+				if (!LinkedNode || LinkedNode == Node || !Depths.Contains(LinkedNode))
+				{
+					continue;
+				}
+
+				const int32 DesiredDepth = CurrentDepth + 1;
+				if (Depths.FindRef(LinkedNode) < DesiredDepth)
+				{
+					Depths.Add(LinkedNode, DesiredDepth);
+				}
+				if (!Queued.Contains(LinkedNode))
+				{
+					Queue.Add(LinkedNode);
+					Queued.Add(LinkedNode);
+				}
+			}
+		}
+	}
+
+	TMap<int32, int32> RowsByDepth;
+	const FScopedTransaction Transaction(LOCTEXT("AutoLayout", "Auto Layout Blueprint Graph"));
+	Graph->Modify();
+
+	Nodes.Sort([](const UEdGraphNode& A, const UEdGraphNode& B)
+	{
+		if (A.NodePosX != B.NodePosX)
+		{
+			return A.NodePosX < B.NodePosX;
+		}
+		return A.NodePosY < B.NodePosY;
+	});
+
+	for (UEdGraphNode* Node : Nodes)
+	{
+		const int32 Depth = Depths.FindRef(Node);
+		int32& Row = RowsByDepth.FindOrAdd(Depth);
+
+		Node->Modify();
+		Node->NodePosX = StartX + Depth * ColumnWidth;
+		Node->NodePosY = StartY + Row * RowHeight;
+		++Row;
+	}
+
+	FBlueprintEditorUtils::MarkBlueprintAsModified(Blueprint);
 	return true;
 }
 

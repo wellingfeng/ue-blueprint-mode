@@ -7,7 +7,7 @@
 
 /**
  * FreeUltraCode BluePrint Mode 编辑器模块。
- * 负责注册控制台命令 /FreeUltraCodeBluePrintMode.BlueprintMode.Start 与 /FreeUltraCodeBluePrintMode.BlueprintMode.End，
+ * 负责注册控制台命令 /FreeUltraCodeBluePrintMode.BlueprintMode.Start、End 与 Capabilities，
  * 并在引擎初始化后触发插件自身的更新检测。
  */
 class FFreeUltraCodeBluePrintModeModule : public IModuleInterface
@@ -17,7 +17,7 @@ public:
 	virtual void ShutdownModule() override;
 
 private:
-	/** 注册 start/end 控制台命令。 */
+	/** 注册 start/end/capabilities 控制台命令。 */
 	void RegisterConsoleCommands();
 	void UnregisterConsoleCommands();
 

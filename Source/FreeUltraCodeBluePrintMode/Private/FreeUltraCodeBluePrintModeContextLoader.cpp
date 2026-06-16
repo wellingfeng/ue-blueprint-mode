@@ -1,6 +1,7 @@
 // Copyright FreeUltraCode BluePrint Mode. All Rights Reserved.
 
 #include "FreeUltraCodeBluePrintModeContextLoader.h"
+#include "FreeUltraCodeBluePrintModeCapabilityRegistry.h"
 #include "Engine/Blueprint.h"
 #include "EdGraph/EdGraph.h"
 #include "EdGraph/EdGraphNode.h"
@@ -141,6 +142,7 @@ FString FFreeUltraCodeBluePrintModeContextLoader::Load(UBlueprint* Blueprint, UE
 
 	Root->SetStringField(TEXT("blueprint"), Blueprint->GetName());
 	Root->SetStringField(TEXT("level"), FString::FromInt((int32)Level));
+	FFreeUltraCodeBluePrintModeCapabilityRegistry::AppendCapabilitiesToJson(Root);
 
 	switch (Level)
 	{

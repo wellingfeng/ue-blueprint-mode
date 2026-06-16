@@ -1,6 +1,7 @@
 // Copyright FreeUltraCode BluePrint Mode. All Rights Reserved.
 
 #include "FreeUltraCodeBluePrintModeSubsystem.h"
+#include "FreeUltraCodeBluePrintModeCapabilityRegistry.h"
 #include "FreeUltraCodeBluePrintModeContextLoader.h"
 #include "FreeUltraCodeBluePrintModeOpExecutor.h"
 #include "FreeUltraCodeBluePrintModeLog.h"
@@ -223,6 +224,7 @@ FFreeUltraCodeBluePrintModeResult UFreeUltraCodeBluePrintModeSubsystem::EnterAct
 	State = EFreeUltraCodeBluePrintModeState::Active;
 
 	Result.bSuccess = true;
+	Result.CapabilitiesJson = FFreeUltraCodeBluePrintModeCapabilityRegistry::DetectAllAsJson();
 	Result.Message = FString::Printf(
 		TEXT("已进入蓝图模式：目标=%s，上下文=%d，agent=%s%s。"),
 		*Blueprint->GetName(),
@@ -231,6 +233,16 @@ FFreeUltraCodeBluePrintModeResult UFreeUltraCodeBluePrintModeSubsystem::EnterAct
 		Args.bDryRun ? TEXT("，dry-run") : TEXT(""));
 	return Result;
 }
+
+FFreeUltraCodeBluePrintModeResult UFreeUltraCodeBluePrintModeSubsystem::QueryCapabilities() const
+{
+	FFreeUltraCodeBluePrintModeResult Result;
+	Result.bSuccess = true;
+	Result.CapabilitiesJson = FFreeUltraCodeBluePrintModeCapabilityRegistry::DetectAllAsJson();
+	Result.Message = TEXT("已查询当前 UE 环境能力。");
+	return Result;
+}
+
 FFreeUltraCodeBluePrintModeResult UFreeUltraCodeBluePrintModeSubsystem::ApplyPlan(const FFreeUltraCodeBluePrintModeOpPlan& Plan)
 {
 	FFreeUltraCodeBluePrintModeResult Result;
@@ -333,4 +345,3 @@ FFreeUltraCodeBluePrintModeResult UFreeUltraCodeBluePrintModeSubsystem::EndMode(
 }
 
 #undef LOCTEXT_NAMESPACE
-

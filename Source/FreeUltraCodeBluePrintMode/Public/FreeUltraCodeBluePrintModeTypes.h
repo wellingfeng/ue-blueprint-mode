@@ -51,6 +51,65 @@ enum class EFreeUltraCodeBluePrintModeOpType : uint8
 	AddFunction	UMETA(DisplayName = "AddFunction"),
 	DeleteNode	UMETA(DisplayName = "DeleteNode"),
 	Disconnect	UMETA(DisplayName = "Disconnect"),
+	AutoLayout	UMETA(DisplayName = "AutoLayout"),
+};
+
+/** 可被 UI/编排层自动启用或隐藏的编辑能力。 */
+UENUM(BlueprintType)
+enum class EFreeUltraCodeBluePrintModeCapabilityId : uint8
+{
+	BlueprintBasicGraph		UMETA(DisplayName = "Blueprint.BasicGraph"),
+	BlueprintNodeDiscovery	UMETA(DisplayName = "Blueprint.NodeDiscovery"),
+	BlueprintKeySpawn		UMETA(DisplayName = "Blueprint.KeySpawn"),
+	BlueprintAutoLayout		UMETA(DisplayName = "Blueprint.AutoLayout"),
+	BlueprintDispatcher		UMETA(DisplayName = "Blueprint.Dispatcher"),
+	BlueprintTimeline		UMETA(DisplayName = "Blueprint.Timeline"),
+	UMGWidgetTree			UMETA(DisplayName = "UMG.WidgetTree"),
+	AnimGraphEdit			UMETA(DisplayName = "AnimGraph.Edit"),
+	StateTreeEdit			UMETA(DisplayName = "StateTree.Edit"),
+	NiagaraStackEdit		UMETA(DisplayName = "Niagara.StackEdit"),
+};
+
+/** 单项能力的运行时探测结果。 */
+USTRUCT(BlueprintType)
+struct FFreeUltraCodeBluePrintModeCapability
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "FreeUltraCodeBluePrintMode|Capabilities")
+	EFreeUltraCodeBluePrintModeCapabilityId CapabilityId = EFreeUltraCodeBluePrintModeCapabilityId::BlueprintBasicGraph;
+
+	/** 稳定机器名，如 "Blueprint.AutoLayout"。 */
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "FreeUltraCodeBluePrintMode|Capabilities")
+	FString Name;
+
+	/** 当前 UE 版本、插件、模块与 API 都满足时为 true。 */
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "FreeUltraCodeBluePrintMode|Capabilities")
+	bool bSupported = false;
+
+	/** 当前插件已有执行器时为 true；false 表示需要可选后端或后续实现。 */
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "FreeUltraCodeBluePrintMode|Capabilities")
+	bool bImplemented = false;
+
+	/** 可直接向用户暴露并执行；通常等于 bSupported && bImplemented。 */
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "FreeUltraCodeBluePrintMode|Capabilities")
+	bool bEnabled = false;
+
+	/** ok / partial / engine_too_old / plugin_missing / api_missing / not_implemented。 */
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "FreeUltraCodeBluePrintMode|Capabilities")
+	FString Reason;
+
+	/** 该能力的最低 UE 版本策略说明。 */
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "FreeUltraCodeBluePrintMode|Capabilities")
+	FString MinVersion;
+
+	/** python / editor_plugin / optional_editor_plugin / unavailable。 */
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "FreeUltraCodeBluePrintMode|Capabilities")
+	FString Backend;
+
+	/** 高风险或小版本差异较大的能力标记为实验性。 */
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "FreeUltraCodeBluePrintMode|Capabilities")
+	bool bExperimental = false;
 };
 
 /**
@@ -167,4 +226,8 @@ struct FFreeUltraCodeBluePrintModeResult
 	/** 待确认动作的标识，前端确认后回传。 */
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "FreeUltraCodeBluePrintMode|BlueprintMode")
 	FString PendingAction;
+
+	/** 当前环境的能力探测 JSON；start 成功或查询能力时返回。 */
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "FreeUltraCodeBluePrintMode|BlueprintMode")
+	FString CapabilitiesJson;
 };

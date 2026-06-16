@@ -33,6 +33,7 @@ private:
 	bool DoConnectPins(const FFreeUltraCodeBluePrintModeOp& Op, FString& OutError);
 	bool DoSetProperty(const FFreeUltraCodeBluePrintModeOp& Op, FString& OutError);
 	bool DoAddVariable(const FFreeUltraCodeBluePrintModeOp& Op, FString& OutError);
+	bool DoAutoLayout(const FFreeUltraCodeBluePrintModeOp& Op, FString& OutError);
 	bool DoDeleteNode(const FFreeUltraCodeBluePrintModeOp& Op, FString& OutError);
 	bool DoDisconnect(const FFreeUltraCodeBluePrintModeOp& Op, FString& OutError);
 

@@ -130,6 +130,20 @@ void FFreeUltraCodeBluePrintModeModule::RegisterConsoleCommands()
 			UE_LOG(LogFreeUltraCodeBluePrintMode, Log, TEXT("[end] %s"), *Result.Message);
 		}),
 		ECVF_Default));
+
+	ConsoleCommands.Add(CM.RegisterConsoleCommand(
+		TEXT("FreeUltraCodeBluePrintMode.BlueprintMode.Capabilities"),
+		TEXT("查询当前 UE 环境可用的蓝图/UMG/AnimGraph/StateTree/Niagara 编辑能力。"),
+		FConsoleCommandDelegate::CreateLambda([]()
+		{
+			if (!GEditor) { return; }
+			UFreeUltraCodeBluePrintModeSubsystem* Sub = GEditor->GetEditorSubsystem<UFreeUltraCodeBluePrintModeSubsystem>();
+			if (!Sub) { return; }
+
+			const FFreeUltraCodeBluePrintModeResult Result = Sub->QueryCapabilities();
+			UE_LOG(LogFreeUltraCodeBluePrintMode, Log, TEXT("[capabilities] %s"), *Result.CapabilitiesJson);
+		}),
+		ECVF_Default));
 }
 
 void FFreeUltraCodeBluePrintModeModule::UnregisterConsoleCommands()

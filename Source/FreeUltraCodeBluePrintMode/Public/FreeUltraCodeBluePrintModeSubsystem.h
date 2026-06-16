@@ -65,6 +65,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "FreeUltraCodeBluePrintMode|BlueprintMode")
 	FFreeUltraCodeBluePrintModeResult ApplyPlan(const FFreeUltraCodeBluePrintModeOpPlan& Plan);
 
+	/** 查询当前 UE 环境与可选后端支持的编辑能力。 */
+	UFUNCTION(BlueprintCallable, Category = "FreeUltraCodeBluePrintMode|Capabilities")
+	FFreeUltraCodeBluePrintModeResult QueryCapabilities() const;
+
 	UFUNCTION(BlueprintPure, Category = "FreeUltraCodeBluePrintMode|BlueprintMode")
 	EFreeUltraCodeBluePrintModeState GetState() const { return State; }
 
