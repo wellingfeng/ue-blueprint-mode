@@ -32,7 +32,7 @@ private:
 		bool bExperimental = false);
 
 	static bool IsEngineAtLeast(int32 Major, int32 Minor);
-	static bool ModuleExists(const FName& ModuleName);
+	static bool ModuleExists(const TCHAR* ModuleName);
 	static bool PluginEnabled(const FString& PluginName);
 	static bool ClassExists(const FString& ClassPath, const FString& ShortClassName = FString());
 	static FString EngineVersionString();

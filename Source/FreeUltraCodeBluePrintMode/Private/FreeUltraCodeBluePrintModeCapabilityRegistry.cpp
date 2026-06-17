@@ -232,7 +232,7 @@ bool FFreeUltraCodeBluePrintModeCapabilityRegistry::IsEngineAtLeast(int32 Major,
 	return ENGINE_MINOR_VERSION >= Minor;
 }
 
-bool FFreeUltraCodeBluePrintModeCapabilityRegistry::ModuleExists(const FName& ModuleName)
+bool FFreeUltraCodeBluePrintModeCapabilityRegistry::ModuleExists(const TCHAR* ModuleName)
 {
 	return FModuleManager::Get().ModuleExists(ModuleName);
 }
